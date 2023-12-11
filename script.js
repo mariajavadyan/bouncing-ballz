@@ -1,6 +1,8 @@
-const canvas = document.querySelector("canvas");
+const canvas = document.getElementById("myCanvas");
 const context = canvas.getContext("2d");
 
+const colors = ["red", "green", "blue", "magenta", "purple", "cyan"];
+let lastColorIndex = -1;
 class Ball {
   constructor(x, y, radius, color) {
     this.x = x;
@@ -8,7 +10,8 @@ class Ball {
     this.radius = radius;
     this.color = color;
     this.velocityY = 0;
-    this.dampening = 0.9;
+    this.dampening = 0.7;
+    this.epsilon = 0.05;
   }
 
   draw(context) {
@@ -20,13 +23,17 @@ class Ball {
   }
 
   update(canvasHeight) {
-    const gravity = 0.98;
+    const gravity = Math.max(Math.random(), 0.5);
     this.velocityY += gravity;
     this.y += this.velocityY;
 
     if (this.y + this.radius > canvasHeight) {
       this.y = canvasHeight - this.radius;
       this.velocityY *= -this.dampening;
+
+      if (Math.abs(this.velocityY) < this.epsilon) {
+        this.velocityY = 0;
+      }
     } else if (this.y - this.radius < 0) {
       this.y = this.radius;
       this.velocityY *= -this.dampening;
@@ -37,15 +44,23 @@ class Ball {
 canvas.width = 1000;
 canvas.height = 700;
 
-let balls = [];
+const balls = [];
 
 canvas.addEventListener("click", function (event) {
-  let rect = canvas.getBoundingClientRect();
-  let x = event.clientX - rect.left;
-  let y = event.clientY - rect.top;
-  let radius = 20;
-  let color = "blue";
-  balls.push(new Ball(x, y, radius, color));
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const radius = 20;
+  if (x - radius >= 0 && x + radius <= canvas.width) {
+    let colorIndex;
+    do {
+      colorIndex = Math.floor(Math.random() * colors.length);
+    } while (colorIndex === lastColorIndex);
+    lastColorIndex = colorIndex;
+
+    const color = colors[colorIndex];
+    balls.push(new Ball(x, y, radius, color));
+  }
 });
 
 let lastTime = 0;
@@ -58,7 +73,7 @@ function tick(currentTime) {
     ball.draw(context);
   });
 
-  lastTime = currentTime;
+  // lastTime = currentTime;
   requestAnimationFrame(tick);
 }
 
