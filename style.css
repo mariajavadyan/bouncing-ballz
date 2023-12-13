@@ -3,4 +3,12 @@ canvas {
     background-color: white;
     margin: 0 auto;
     display: block;
+
 }
+
+#myCanvas {
+    background-image: url('./background.jpg'); 
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
