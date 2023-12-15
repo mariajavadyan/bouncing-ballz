@@ -47,21 +47,24 @@ class Ball {
     context.closePath();
   }
 
-  update(canvasHeight) {
-    const gravity = Math.max(Math.random(), 0.5);
-    this.velocityY += gravity;
-    this.y += this.velocityY;
+  update(canvasHeight, deltaTime) {
+    if (this.velocitY !== 0) {
+      // gravity determines a realistic acceleration
+      const gravity = 0.005;
+      this.velocityY += gravity * deltaTime;
+      this.y += this.velocityY * deltaTime;
 
-    if (this.y + this.radius > canvasHeight) {
-      this.y = canvasHeight - this.radius;
-      this.velocityY *= -this.dampening;
+      if (this.y + this.radius > canvasHeight) {
+        this.y = canvasHeight - this.radius;
+        this.velocityY *= -this.dampening;
 
-      if (Math.abs(this.velocityY) < this.epsilon) {
-        this.velocityY = 0;
+        if (Math.abs(this.velocityY) < this.epsilon) {
+          this.velocityY = 0;
+        }
+      } else if (this.y - this.radius < 0) {
+        this.y = this.radius;
+        this.velocityY *= -this.dampening;
       }
-    } else if (this.y - this.radius < 0) {
-      this.y = this.radius;
-      this.velocityY *= -this.dampening;
     }
   }
 }
@@ -98,13 +101,15 @@ canvas.addEventListener("click", function (event) {
 
 let lastTime = 0;
 function tick(currentTime) {
-  //let deltaTime = currentTime - lastTime;
+  let deltaTime = currentTime - lastTime;
   context.clearRect(0, 0, canvas.width, canvas.height);
 
   balls.forEach(function (ball) {
-    ball.update(canvas.height);
+    ball.update(canvas.height, deltaTime);
     ball.draw(context);
   });
+
+  lastTime = currentTime;
 
   requestAnimationFrame(tick);
 }
